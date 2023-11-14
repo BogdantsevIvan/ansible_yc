@@ -1,3 +1,4 @@
 /packer/secret-variables.pkrvars.hcl
 command.txt
 /terraform/*.terraform*
+/terraform/*.tfstate*
