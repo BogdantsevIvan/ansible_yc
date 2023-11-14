@@ -1,2 +1,2 @@
-./packer/secret-variables.pkrvars.hcl
+/packer/secret-variables.pkrvars.hcl
 command.txt
