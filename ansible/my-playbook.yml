@@ -1,0 +1,11 @@
+- name: Run Terraform init
+  command: terraform init ./terraform/
+  args:
+    chdir: ./terraform/
+  become: yes
+
+- name: Run Terraform build
+  shell: terraform apply -auto-approve-var-file="./my-variables.tfvars" ./terraform/
+  args:
+    chdir: ./terraform/
+  become: yes
