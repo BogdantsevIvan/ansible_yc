@@ -2,3 +2,5 @@
 command.txt
 /terraform/*.terraform*
 /terraform/*.tfstate*
+/terraform/meta.txt
+/terraform/my-variables.tfvars
