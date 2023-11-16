@@ -12,3 +12,79 @@
       command: terraform apply -auto-approve -var-file="./my-variables.tfvars"
       args:
         chdir: "{{ playbook_dir }}/terraform/"
+
+    - name: Read IP from terraform.tfstate
+      command: "terraform output -json"
+      register: tf_output
+      changed_when: false
+      args:
+        chdir: "{{ playbook_dir }}/terraform/"
+            
+    - name: Set dynamic hosts
+      add_host:
+        name: "vm_1"
+        ansible_host: "{{ tf_output.stdout | from_json | json_query('external_ip_address_vm_1.value') }}"
+        ansible_ssh_private_key_file: "~/.ssh/id_rsa.pub"
+        ansible_user: "my-user"
+        groups: dynamic_hosts
+    - name: Пауза перед выполнением следующей задачи
+      pause:
+        seconds: 40 
+
+- hosts: dynamic_hosts
+  gather_facts: false
+  become: true
+  tasks:
+      
+    - name: Install unzip and curl
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - unzip
+        - curl
+      tags:
+        - prerequisites
+
+    - name: Download Packer
+      get_url:
+        url: https://hashicorp-releases.yandexcloud.net/packer/1.9.4/packer_1.9.4_netbsd_amd64.zip 
+        dest: /tmp/packer.zip
+      tags:
+        - packer
+
+    - name: Unpack Packer
+      unarchive:
+        src: /tmp/packer.zip
+        dest: /usr/local/bin
+        remote_src: yes
+      tags:
+        - packer
+
+    - name: Remove archive
+      file:
+        path: /tmp/packer.zip
+        state: absent
+      tags:
+        - packer
+        
+    - name: Copy packer configs
+      copy:
+        src: "{{ playbook_dir }}/packer/"
+        dest: "/home/my-user/packer/"
+
+    # - name: Run Packer
+    #   command: packer build -var-file="./packer/variables.pkrvars.hcl" -var-file="./packer/secret-variables.pkrvars.hcl" ./packer/
+    - name: Run Packer
+      command: packer init  .
+      args:
+        chdir: "/home/my-user/packer/"
+
+- name: Run Terraform stop
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Run Terraform destroy
+      command: terraform destroy -auto-approve -var-file="./my-variables.tfvars"
+      args:
+        chdir: "{{ playbook_dir }}/terraform/"
