@@ -1,0 +1,14 @@
+---
+- name: Run Terraform start
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Run Terraform init
+      command: terraform init
+      args:
+        chdir: "{{ playbook_dir }}/terraform/"
+
+    - name: Run Terraform apply
+      command: terraform apply -auto-approve -var-file="./my-variables.tfvars"
+      args:
+        chdir: "{{ playbook_dir }}/terraform/"
