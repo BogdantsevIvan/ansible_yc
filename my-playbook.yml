@@ -1,6 +1,5 @@
 ---
-- name: Run Terraform start
-  hosts: localhost
+- hosts: localhost
   gather_facts: false
   tasks:
     - name: Run Terraform init
@@ -27,14 +26,14 @@
         ansible_ssh_private_key_file: "~/.ssh/id_rsa.pub"
         ansible_user: "my-user"
         groups: dynamic_hosts
-    - name: Пауза перед выполнением следующей задачи
-      pause:
-        seconds: 40 
 
 - hosts: dynamic_hosts
   gather_facts: false
   become: true
   tasks:
+      
+    - name: Wait for system to become reachable
+      wait_for_connection:
       
     - name: Install unzip and curl
       package:
@@ -46,37 +45,27 @@
       tags:
         - prerequisites
 
-    - name: Download Packer
-      get_url:
-        url: https://hashicorp-releases.yandexcloud.net/packer/1.9.4/packer_1.9.4_netbsd_amd64.zip 
-        dest: /tmp/packer.zip
-      tags:
-        - packer
+    - name: Download Packer archive
+      shell: "sudo wget https://hashicorp-releases.yandexcloud.net/packer/1.9.4/packer_1.9.4_linux_amd64.zip"
 
-    - name: Unpack Packer
-      unarchive:
-        src: /tmp/packer.zip
-        dest: /usr/local/bin
-        remote_src: yes
-      tags:
-        - packer
+    - name: Unzip packer
+      shell: "unzip packer_1.9.4_linux_amd64.zip"
 
-    - name: Remove archive
-      file:
-        path: /tmp/packer.zip
-        state: absent
-      tags:
-        - packer
-        
+    - name: Move Packer into /bin
+      shell: "sudo mv packer /bin"
+
     - name: Copy packer configs
       copy:
         src: "{{ playbook_dir }}/packer/"
         dest: "/home/my-user/packer/"
 
-    # - name: Run Packer
-    #   command: packer build -var-file="./packer/variables.pkrvars.hcl" -var-file="./packer/secret-variables.pkrvars.hcl" ./packer/
-    - name: Run Packer
-      command: packer init  .
+    - name: Run Packer  init
+      command: packer init config.pkr.hcl
+      args:
+        chdir: "/home/my-user/packer/"
+
+    - name: Run Packer  build
+      command: packer build -var-file="./variables.pkrvars.hcl" -var-file="./secret-variables.pkrvars.hcl" my-greeting-ubuntu.pkr.hcl
       args:
         chdir: "/home/my-user/packer/"
 
