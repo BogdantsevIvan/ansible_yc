@@ -11,7 +11,11 @@
 cp terraform/my-variables.tfvars-example terraform/my-variables.tfvars
 cp packer/secret-variables.pkrvars.hcl-example packer/secret-variables.pkrvars.hcl
 
-## Шаг 2: Запуск Ansible playbook
+## Шаг 2: Добавьте ключ
+
+Добавьте публичную часть ssh ключа машины, с которой запускается плейбук, в файл terraform/meta.txt-example
+
+## Шаг 3: Запуск Ansible playbook
 
 После того как переменные сконфигурированы, из корневой директории проекта запустите команду:
 
