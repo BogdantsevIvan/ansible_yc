@@ -41,7 +41,6 @@
         state: present
       with_items:
         - unzip
-        - curl
       tags:
         - prerequisites
 
