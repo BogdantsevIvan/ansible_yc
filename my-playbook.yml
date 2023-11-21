@@ -35,13 +35,12 @@
     - name: Wait for system to become reachable
       wait_for_connection:
       
-    - name: Install unzip and curl
+    - name: Install unzip
       package:
         name: "{{ item }}"
         state: present
       with_items:
         - unzip
-        - curl
       tags:
         - prerequisites
 
