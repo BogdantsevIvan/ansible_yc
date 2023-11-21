@@ -18,6 +18,16 @@ variable "subnetId" {
   default = "subnetId"
 }
 
+variable "serviceAccountId" {
+  type = string
+  default = "serviceAccountId"
+}
+
+variable "s3Name" {
+  type = string
+  default = "s3Name"
+}
+
  source "yandex" "ubuntu-greeting" {
    token               = var.OAuth 
    folder_id           = var.folderId 
