@@ -38,5 +38,18 @@ variable "subnetId" {
    provisioner "shell" {
      inline = [" sudo bash -c 'echo ${var.greet} | sudo tee /etc/motd'"]
    }
+
+   post-processor "yandex-export" {
+      folder_id = var.folderId 
+      subnet_id = var.subnetId 
+      service_account_id = var.serviceAccountId
+      token               = var.OAuth 
+  
+     paths = [
+       "s3://${var.s3Name}/my-ubuntu-greeting-image.qcow2"
+     ]
+  
+     keep_input_artifact = true
+   }
  }
  
